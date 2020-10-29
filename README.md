@@ -1,5 +1,4 @@
-This is Redis version 6.0.8. I'm just playing around with it :)
---------------
+This is Redis version 6.0.8. I'm just playing around with it :) Below is the original README from the project.
 
 This README is just a fast *quick start* document. You can find more detailed documentation at [redis.io](https://redis.io).
 
