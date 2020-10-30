@@ -26,7 +26,7 @@ if len(keys_inserted) != num_kv_to_warmup:
     print "Mismatched number of keys for warmup"
 
 # Our goal is to generate 1 billion requests using a single client
-num_requests_to_execute = 100006000
+num_requests_to_execute = 1000060000
 num_set_requests = int(num_requests_to_execute/31.0) # 3.226 million
 num_get_requests = num_requests_to_execute - num_set_requests # 96.78 million
 
