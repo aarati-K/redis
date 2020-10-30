@@ -126,7 +126,7 @@ for i in range(num_iterations):
             end = time.time()
             get_latencies.append(end-start)
 
-sleep(120)
+time.sleep(120)
 
 # Write measured latencies to file
 set_results_file = "/users/aarati_K/hdd/ETC/latency_insert"
