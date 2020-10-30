@@ -61,6 +61,7 @@
  * the number of elements and the buckets > dict_force_resize_ratio. */
 static int dict_can_resize = 1;
 static unsigned int dict_force_resize_ratio = 5;
+static int dict_can_rearrange = 0;
 
 /* -------------------------- private prototypes ---------------------------- */
 
@@ -1029,6 +1030,14 @@ void dictEnableResize(void) {
 
 void dictDisableResize(void) {
     dict_can_resize = 0;
+}
+
+void dictEnableRearrange(void) {
+    dict_can_rearrange = 1;
+}
+
+void dictDisableRearrange(void) {
+    dict_can_rearrange = 0;
 }
 
 uint64_t dictGetHash(dict *d, const void *key) {

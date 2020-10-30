@@ -52,6 +52,7 @@ typedef struct dictEntry {
         int64_t s64;
         double d;
     } v;
+    int8_t rel_accesses;
     struct dictEntry *next;
 } dictEntry;
 
@@ -148,7 +149,8 @@ typedef void (dictScanBucketFunction)(void *privdata, dictEntry **bucketref);
 #define dictIsRehashing(d) ((d)->rehashidx != -1)
 
 /* API */
-dict *dictCreate(dictType *type, void *privDataPtr);
+dict *dictCreate(dictType *type, void *privDataPtr); //
+// Called by dictResize, _dictExpandIfNeeded. Expands/Creates the hash table
 int dictExpand(dict *d, unsigned long size);
 int dictAdd(dict *d, void *key, void *val);
 dictEntry *dictAddRaw(dict *d, void *key, dictEntry **existing);
@@ -158,8 +160,11 @@ int dictDelete(dict *d, const void *key);
 dictEntry *dictUnlink(dict *ht, const void *key);
 void dictFreeUnlinkedEntry(dict *d, dictEntry *he);
 void dictRelease(dict *d);
+// This is the main function that needs to be change
 dictEntry * dictFind(dict *d, const void *key);
 void *dictFetchValue(dict *d, const void *key);
+// Doesn't seem to use dict_force_resize_ratio.  Calls dictExpand.
+// A different fn _dictExpandIfNeeded uses dict_force_resize_ratio
 int dictResize(dict *d);
 dictIterator *dictGetIterator(dict *d);
 dictIterator *dictGetSafeIterator(dict *d);
@@ -174,6 +179,8 @@ uint64_t dictGenCaseHashFunction(const unsigned char *buf, int len);
 void dictEmpty(dict *d, void(callback)(void*));
 void dictEnableResize(void);
 void dictDisableResize(void);
+void dictEnableRearrange(void);
+void dictDisableRearrange(void);
 int dictRehash(dict *d, int n);
 int dictRehashMilliseconds(dict *d, int ms);
 void dictSetHashFunctionSeed(uint8_t *seed);
