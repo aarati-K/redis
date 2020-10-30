@@ -60,7 +60,7 @@ r = redis.Redis()
 start = time.time()
 try:
     for i in range(num_batches):
-        rns = num_kv_to_warmup[i*batch_size:(i+1)*batch_size]
+        rns = keys_inserted[i*batch_size:(i+1)*batch_size]
         hm = {}
         for rn in rns:
             hm[rn] = rn
