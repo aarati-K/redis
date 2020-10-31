@@ -133,13 +133,13 @@ for i in range(num_iterations):
 time.sleep(120)
 
 # Write measured latencies to file
-set_results_file = "/users/aarati_K/hdd/ETC/latency_insert"
+set_results_file = "/users/aarati_K/hdd/ETC/latency_insert_master"
 f = open(set_results_file, 'w')
 for l in set_latencies:
     f.write("{}\n".format(l))
 f.close()
 
-get_results_file = "/users/aarati_K/hdd/ETC/latency_fetch"
+get_results_file = "/users/aarati_K/hdd/ETC/latency_fetch_master"
 f = open(get_results_file, 'w')
 for l in get_latencies:
     f.write("{}\n".format(l))
