@@ -7,7 +7,7 @@ import redis
 ########### DATA LOADING ###################
 ############################################
 
-# 2.5 million keys to insert during warmup
+# 250 million keys to insert during warmup
 # They generate an rdb file of about 9GB
 warmup_filename = "/users/aarati_K/hdd/ETC/warmup"
 
@@ -26,6 +26,8 @@ if len(keys_inserted) != num_kv_to_warmup:
     print "Mismatched number of keys for warmup"
 
 # Our goal is to generate 1 billion requests using a single client
+# NOTE: we reduce the number of iterations from 50 to 200
+# So actually only 1/4th of these arrays will be used
 num_requests_to_execute = 1000060000
 num_set_requests = int(num_requests_to_execute/31.0) # 3.226 million
 num_get_requests = num_requests_to_execute - num_set_requests # 96.78 million
@@ -87,8 +89,8 @@ print
 # We model an approximate zipfian
 
 # Issue approx 50 million requests in each loop
-# We run the loop a 200 times, so 50M requests overall
-num_iterations = 200
+# We run the loop a 50 times, so 250M requests overall
+num_iterations = 50
 num_get_batches = 300
 num_set_batches = 10
 batch_size = 10
@@ -96,8 +98,10 @@ set_latencies = []
 get_latencies = []
 set_batch_offset = 0
 get_batch_offset = 0
-# 200 * 1613 * 3100 = 1000060000 (1000.006 million requests total)
+# 50 * 1613 * 3100 = 250015000 (250.015 million requests total)
 for i in range(num_iterations):
+    if i%10 == 0:
+        print "Iteration", i
     for j in range(1613):
         # Batch size is 10 for both set and get requests
         # Issue 300 get batches, and 10 set batch
