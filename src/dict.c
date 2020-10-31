@@ -210,6 +210,7 @@ int dictRehash(dict *d, int n) {
             h = dictHashKey(d, de->key) & d->ht[1].sizemask;
             de->next = d->ht[1].table[h];
             d->ht[1].table[h] = de;
+            de->rel_accesses = 0;
             d->ht[0].used--;
             d->ht[1].used++;
             de = nextde;
@@ -309,6 +310,7 @@ dictEntry *dictAddRaw(dict *d, void *key, dictEntry **existing)
      * more frequently. */
     ht = dictIsRehashing(d) ? &d->ht[1] : &d->ht[0];
     entry = zmalloc(sizeof(*entry));
+    entry->rel_accesses = 0;
     entry->next = ht->table[index];
     ht->table[index] = entry;
     ht->used++;
@@ -477,17 +479,57 @@ void dictRelease(dict *d)
 dictEntry *dictFind(dict *d, const void *key)
 {
     dictEntry *he;
+    dictEntry *previous;
+    dictEntry *previous_previous;
+    uint16_t disp;
     uint64_t h, idx, table;
 
     if (dictSize(d) == 0) return NULL; /* dict is empty */
     if (dictIsRehashing(d)) _dictRehashStep(d);
     h = dictHashKey(d, key);
     for (table = 0; table <= 1; table++) {
+        disp = 0;
         idx = h & d->ht[table].sizemask;
         he = d->ht[table].table[idx];
+        // Have to maintain pointers to the previous entry,
+        // and the entry before that
+        previous = previous_previous = he;
         while(he) {
-            if (key==he->key || dictCompareKeys(d, key, he->key))
+            disp += 1;
+            if (key==he->key || dictCompareKeys(d, key, he->key)) {
+                if (dict_can_rearrange) {
+                    // This entry is accessed one more time than the next
+                    // Saturate counter at 2
+                    if (he->next != NULL && he->rel_accesses < 2) {
+                        he->rel_accesses += 1;
+                    }
+
+                    // If there is a previous entry
+                    if (disp > 1) {
+                        if (previous == he) {
+                            printf("Panic!! previous is same as cur, but disp: %d\n", disp);
+                        }
+                        previous->rel_accesses -= 1;
+                        if (previous->rel_accesses == -2) {
+                            // Will need to rearrange
+                            if (disp > 2) {
+                                previous_previous->next = he;
+                                previous->next = he->next;
+                                he->next = previous;
+                            } else { // disp == 2
+                                d->ht[table].table[idx] = he;
+                                previous->next = he->next;
+                                he->next = previous;
+                            }
+                            he->rel_accesses = 2;
+                            previous->rel_accesses = 0;
+                        }
+                    }
+                }
                 return he;
+            }
+            previous_previous = previous;
+            previous = he;
             he = he->next;
         }
         if (!dictIsRehashing(d)) return NULL;
