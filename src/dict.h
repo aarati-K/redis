@@ -79,6 +79,7 @@ typedef struct dict {
     dictht ht[2];
     long rehashidx; /* rehashing not in progress if rehashidx == -1 */
     unsigned long iterators; /* number of iterators currently running */
+    long displacement;
 } dict;
 
 /* If safe is set to 1 this is a safe iterator, that means, you can call

@@ -293,6 +293,7 @@ void mgetCommand(client *c) {
     int j;
 
     addReplyArrayLen(c,c->argc-1);
+    serverLog(LL_NOTICE, "Disp start: %ld", c->db->dict->displacement);
     for (j = 1; j < c->argc; j++) {
         robj *o = lookupKeyRead(c->db,c->argv[j]);
         if (o == NULL) {
@@ -305,6 +306,7 @@ void mgetCommand(client *c) {
             }
         }
     }
+    serverLog(LL_NOTICE, "Disp end: %ld", c->db->dict->displacement);
 }
 
 void msetGenericCommand(client *c, int nx) {

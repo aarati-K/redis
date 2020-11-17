@@ -127,6 +127,7 @@ int _dictInit(dict *d, dictType *type,
     d->privdata = privDataPtr;
     d->rehashidx = -1;
     d->iterators = 0;
+    d->displacement = 0;
     return DICT_OK;
 }
 
@@ -477,6 +478,7 @@ dictEntry *dictFind(dict *d, const void *key)
 {
     dictEntry *he;
     uint64_t h, idx, table;
+    int disp = 0;
 
     if (dictSize(d) == 0) return NULL; /* dict is empty */
     if (dictIsRehashing(d)) _dictRehashStep(d);
@@ -484,10 +486,13 @@ dictEntry *dictFind(dict *d, const void *key)
     for (table = 0; table <= 1; table++) {
         idx = h & d->ht[table].sizemask;
         he = d->ht[table].table[idx];
+        disp = 1;
         while(he) {
             if (key==he->key || dictCompareKeys(d, key, he->key))
+                d->displacement += disp;
                 return he;
             he = he->next;
+            disp += 1;
         }
         if (!dictIsRehashing(d)) return NULL;
     }
