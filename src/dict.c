@@ -488,9 +488,10 @@ dictEntry *dictFind(dict *d, const void *key)
         he = d->ht[table].table[idx];
         disp = 1;
         while(he) {
-            if (key==he->key || dictCompareKeys(d, key, he->key))
+            if (key==he->key || dictCompareKeys(d, key, he->key)) {
                 d->displacement += disp;
                 return he;
+            }
             he = he->next;
             disp += 1;
         }
